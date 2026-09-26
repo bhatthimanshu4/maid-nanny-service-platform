@@ -5,10 +5,7 @@ const Helper = require("../models/Helper");
 const router = express.Router();
 
 // Update helper verification status
-router.put(
-  "/helpers/:helperId/verification",
-  authMiddleware,
-  async (req, res) => {
+router.put("/helpers/:helperId/verification",authMiddleware,async (req, res) => {
     try {
       const { verificationStatus } = req.body;
 

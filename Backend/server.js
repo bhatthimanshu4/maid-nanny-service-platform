@@ -5,8 +5,6 @@ const dotenv = require('dotenv');
 
 
 dotenv.config();
-
-
 const app = express();
 
 // Middleware
@@ -16,8 +14,6 @@ app.use(express.json());
 
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
-
-
 
 const authRoutes = require("./routes/authRoutes");
 app.use(express.json());
@@ -31,6 +27,11 @@ const helperRoutes = require("./routes/helperRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/helpers", helperRoutes);
 
+const servicePlanRoutes = require("./routes/servicePlanRoutes");
+app.use("/api/service-plans", servicePlanRoutes);
+
+const bookingRoutes = require("./routes/BookingRoutes");
+app.use("/api/bookings", bookingRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
