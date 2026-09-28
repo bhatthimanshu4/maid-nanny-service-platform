@@ -168,4 +168,114 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
   }
 });
 
+// Get household's bookings
+router.get("/my-bookings", authMiddleware, async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      household: req.user.id
+    })
+      .populate("helper")
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Household bookings fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Cancel booking
+router.put("/:id/cancel", authMiddleware, async (req, res) => {
+  try {
+    const booking = await Booking.findOne({
+      _id: req.params.id,
+      household: req.user.id
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    if (!["pending", "accepted"].includes(booking.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This booking cannot be cancelled"
+      });
+    }
+
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully",
+      data: booking
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Complete booking
+router.put("/:id/complete", authMiddleware, async (req, res) => {
+  try {
+    const helper = await Helper.findOne({
+      user: req.user.id
+    });
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper profile not found"
+      });
+    }
+
+    const booking = await Booking.findOne({
+      _id: req.params.id,
+      helper: helper._id
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    if (booking.status !== "accepted") {
+      return res.status(400).json({
+        success: false,
+        message: "Only accepted bookings can be completed"
+      });
+    }
+
+    booking.status = "completed";
+
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Booking completed successfully",
+      data: booking
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 module.exports = router;
