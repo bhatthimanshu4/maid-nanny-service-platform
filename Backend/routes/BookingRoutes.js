@@ -101,6 +101,101 @@ router.get("/helper", authMiddleware, async (req, res) => {
     });
   }
 });
+// Get helper completed jobs
+router.get("/helper/history", authMiddleware, async (req, res) => {
+  try {
+    const helper = await Helper.findOne({
+      user: req.user.id
+    });
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper profile not found"
+      });
+    }
+
+    const bookings = await Booking.find({
+      helper: helper._id,
+      status: "completed"
+    })
+      .populate("household", "-password")
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Helper job history fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Get helper earnings
+router.get("/helper/earnings", authMiddleware, async (req, res) => {
+  try {
+    const helper = await Helper.findOne({
+      user: req.user.id
+    });
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper profile not found"
+      });
+    }
+
+    const completedBookings = await Booking.find({
+      helper: helper._id,
+      status: "completed"
+    }).populate("servicePlan");
+
+    const totalEarnings = completedBookings.reduce(
+      (total, booking) => total + booking.servicePlan.price,
+      0
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Helper earnings fetched successfully",
+      data: {
+        completedJobs: completedBookings.length,
+        totalEarnings: totalEarnings
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Get household's bookings
+router.get("/my-bookings", authMiddleware, async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      household: req.user.id
+    })
+      .populate("helper")
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Household bookings fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 // Accept or reject booking
 router.put("/:id/status", authMiddleware, async (req, res) => {
@@ -159,28 +254,6 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
       success: true,
       message: `Booking ${status} successfully`,
       data: booking
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Get household's bookings
-router.get("/my-bookings", authMiddleware, async (req, res) => {
-  try {
-    const bookings = await Booking.find({
-      household: req.user.id
-    })
-      .populate("helper")
-      .populate("servicePlan");
-
-    res.status(200).json({
-      success: true,
-      message: "Household bookings fetched successfully",
-      data: bookings
     });
   } catch (error) {
     res.status(500).json({
@@ -278,4 +351,7 @@ router.put("/:id/complete", authMiddleware, async (req, res) => {
     });
   }
 });
+
+
+
 module.exports = router;

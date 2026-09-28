@@ -140,4 +140,39 @@ router.get("/helper/:helperId/rating", async (req, res) => {
   }
 });
 
+// Get helper completed jobs
+router.get("/helper/history", authMiddleware, async (req, res) => {
+  try {
+    const helper = await Helper.findOne({
+      user: req.user.id
+    });
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper profile not found"
+      });
+    }
+
+    const bookings = await Booking.find({
+      helper: helper._id,
+      status: "completed"
+    })
+      .populate("household", "-password")
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Helper job history fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+
 module.exports = router;
