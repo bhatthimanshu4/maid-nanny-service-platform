@@ -199,4 +199,25 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// View active service plans of a helper
+router.get("/helper/:helperId", async (req, res) => {
+  try {
+    const plans = await ServicePlan.find({
+      helper: req.params.helperId,
+      isActive: true
+    }).populate("helper");
+
+    res.status(200).json({
+      success: true,
+      message: "Helper service plans fetched successfully",
+      data: plans
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;
