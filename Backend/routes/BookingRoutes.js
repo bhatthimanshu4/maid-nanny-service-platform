@@ -197,6 +197,39 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
   }
 });
 
+
+// Household booking history
+router.get("/history", authMiddleware, async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      household: req.user.id,
+      status: {
+        $in: ["completed", "rejected", "cancelled"]
+      }
+    })
+      .populate({
+        path: "helper",
+        populate: {
+          path: "user",
+          select: "name email phone city"
+        }
+      })
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Household booking history fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Dynamic Routes
 // Accept or reject booking
 router.put("/:id/status", authMiddleware, async (req, res) => {
   try {
@@ -351,7 +384,5 @@ router.put("/:id/complete", authMiddleware, async (req, res) => {
     });
   }
 });
-
-
 
 module.exports = router;

@@ -170,4 +170,83 @@ router.post("/verification-documents",authMiddleware,upload.single("document"),a
   }
 );
 
+// Browse, search and filter verified helpers
+router.get("/browse", async (req, res) => {
+  try {
+    const { search, helperType, city } = req.query;
+
+    const filter = {
+      verificationStatus: "verified",
+      availability: "available"
+    };
+
+    if (helperType) {
+      filter.helperType = helperType;
+    }
+
+    const helpers = await Helper.find(filter)
+      .populate("user", "name email phone address city")
+      .select("-verificationDocuments");
+
+    let filteredHelpers = helpers;
+
+    if (search) {
+      filteredHelpers = filteredHelpers.filter((helper) =>
+        helper.user.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (city) {
+      filteredHelpers = filteredHelpers.filter(
+        (helper) =>
+          helper.user.city &&
+          helper.user.city.toLowerCase() === city.toLowerCase()
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Helpers fetched successfully",
+      data: filteredHelpers
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// View helper profile
+router.get("/:id", async (req, res) => {
+  try {
+    const helper = await Helper.findOne({
+      _id: req.params.id,
+      verificationStatus: "verified"
+    })
+      .populate("user", "name email phone address city")
+      .select("-verificationDocuments");
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Helper profile fetched successfully",
+      data: helper
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+
+
 module.exports = router;
