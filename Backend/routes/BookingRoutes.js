@@ -101,6 +101,7 @@ router.get("/helper", authMiddleware, async (req, res) => {
     });
   }
 });
+
 // Get helper completed jobs
 router.get("/helper/history", authMiddleware, async (req, res) => {
   try {
@@ -196,7 +197,6 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
     });
   }
 });
-
 
 // Household booking history
 router.get("/history", authMiddleware, async (req, res) => {

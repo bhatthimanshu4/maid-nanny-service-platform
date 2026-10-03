@@ -108,6 +108,12 @@ router.post("/login", async (req, res) => {
         message: "Invalid email or password"
       });
     }
+        if (!user.isActive) {
+  return res.status(403).json({
+    success: false,
+    message: "Your account is inactive. Please contact admin."
+  });
+}
 
     // Generate JWT token
     const token = jwt.sign( 
