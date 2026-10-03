@@ -16,12 +16,15 @@ const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
 const authRoutes = require("./routes/authRoutes");
+app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 const userRoutes = require("./routes/userRoutes");
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
 const helperRoutes = require("./routes/helperRoutes");
+app.use("/api/auth", authRoutes);
 app.use("/api/helpers", helperRoutes);
 
 const servicePlanRoutes = require("./routes/servicePlanRoutes");

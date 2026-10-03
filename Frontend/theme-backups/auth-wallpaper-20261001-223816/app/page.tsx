@@ -78,6 +78,14 @@ export default function Home() {
           >
             <div className="absolute h-64 w-64 rounded-full bg-primary/25 blur-3xl animate-warm-pulse sm:h-80 sm:w-80" />
 
+            <div className="absolute left-[2%] top-[12%] z-20 flex items-center gap-3 rounded-2xl border border-border bg-surface/95 px-4 py-3 shadow-lg animate-float-soft sm:left-[3%]">
+              <SmileIcon className="h-11 w-11 animate-smile-soft" />
+              <div>
+                <p className="text-xs font-medium text-foreground/60">A helping hand</p>
+                <p className="text-sm font-semibold text-foreground">Right when you need it</p>
+              </div>
+            </div>
+
             <div className="relative z-10 w-[min(100%,360px)] rounded-[2rem] border border-border bg-surface/90 p-6 shadow-[0_24px_80px_rgba(91,59,43,0.14)] backdrop-blur-sm sm:p-8">
               <div className="flex items-center justify-between">
                 <div>
@@ -106,14 +114,22 @@ export default function Home() {
                     className="animate-helping-path"
                   />
                 </svg>
-                <div className="flex h-20 w-20 items-center justify-center rounded-3xl border-2 border-white bg-primary/25 text-4xl text-primary-dark shadow-sm">
-                  🤝
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/25">
+                  <SmileIcon className="h-14 w-14" />
                 </div>
               </div>
 
               <div className="rounded-2xl bg-background px-4 py-3 text-center">
                 <p className="text-sm font-semibold text-foreground">A little help goes a long way</p>
                 <p className="mt-1 text-xs text-foreground/65">People caring for people</p>
+              </div>
+            </div>
+
+            <div className="absolute bottom-[10%] right-[1%] z-20 flex items-center gap-3 rounded-2xl border border-border bg-surface/95 px-4 py-3 shadow-lg animate-float-delayed sm:right-[2%]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-xl text-primary-dark">♡</span>
+              <div>
+                <p className="text-xs font-medium text-foreground/60">Care shared</p>
+                <p className="text-sm font-semibold text-foreground">Smiles all around</p>
               </div>
             </div>
 

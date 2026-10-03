@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff8f3;
+  --foreground: #292524;
+  --primary: #e8b89c;
+  --primary-dark: #d89b78;
+  --surface: #ffffff;
+  --border: #e7d5ca;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes smile-soft {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+@keyframes warm-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes helping-path {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes sparkle-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-float-soft {
+  animation: float-soft 5.5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-soft 6.5s ease-in-out -2.4s infinite;
+}
+
+.animate-smile-soft {
+  animation: smile-soft 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.animate-warm-pulse {
+  animation: warm-pulse 8s ease-in-out infinite;
+}
+
+.animate-helping-path {
+  animation: helping-path 7s linear infinite;
+}
+
+.animate-sparkle-soft {
+  animation: sparkle-soft 3s ease-in-out infinite;
+}
+
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-soft,
+  .animate-float-delayed,
+  .animate-smile-soft,
+  .animate-warm-pulse,
+  .animate-helping-path,
+  .animate-sparkle-soft {
+    animation: none;
+  }
+}

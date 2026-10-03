@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff8f3;
+  --foreground: #292524;
+  --primary: #e8b89c;
+  --primary-dark: #d89b78;
+  --surface: #ffffff;
+  --border: #e7d5ca;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes smile-soft {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+@keyframes warm-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes helping-path {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes sparkle-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes wallpaper-drift-left {
+  from {
+    transform: rotate(-12deg) translate3d(0, 0, 0);
+  }
+  to {
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes wallpaper-drift-right {
+  from {
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: rotate(-12deg) translate3d(0, 0, 0);
+  }
+}
+
+.animate-smile-soft {
+  animation: smile-soft 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.animate-warm-pulse {
+  animation: warm-pulse 8s ease-in-out infinite;
+}
+
+.animate-helping-path {
+  animation: helping-path 7s linear infinite;
+}
+
+.animate-sparkle-soft {
+  animation: sparkle-soft 3s ease-in-out infinite;
+}
+
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+
+.auth-wallpaper-track {
+  position: absolute;
+  left: -30%;
+  display: flex;
+  width: max-content;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+  opacity: 0.82;
+  will-change: transform;
+}
+
+.auth-wallpaper-track-one {
+  top: 8%;
+  animation: wallpaper-drift-left 72s linear infinite;
+}
+
+.auth-wallpaper-track-two {
+  top: 29%;
+  animation: wallpaper-drift-right 88s linear infinite;
+}
+
+.auth-wallpaper-track-three {
+  top: 53%;
+  animation: wallpaper-drift-left 96s linear infinite;
+}
+
+.auth-wallpaper-track-four {
+  top: 77%;
+  animation: wallpaper-drift-right 82s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-smile-soft,
+  .animate-warm-pulse,
+  .animate-helping-path,
+  .animate-sparkle-soft,
+  .auth-wallpaper-track-one,
+  .auth-wallpaper-track-two,
+  .auth-wallpaper-track-three,
+  .auth-wallpaper-track-four {
+    animation: none;
+  }
+}

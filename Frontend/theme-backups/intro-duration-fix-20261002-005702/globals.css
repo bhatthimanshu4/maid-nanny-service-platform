@@ -71,13 +71,13 @@ body {
     transform: rotate(-12deg) translate3d(0, 0, 0);
   }
   to {
-    transform: rotate(-12deg) translate3d(-33.333%, 0, 0);
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
   }
 }
 
 @keyframes wallpaper-drift-right {
   from {
-    transform: rotate(-12deg) translate3d(-33.333%, 0, 0);
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
   }
   to {
     transform: rotate(-12deg) translate3d(0, 0, 0);
@@ -107,13 +107,13 @@ body {
 
 .auth-wallpaper-track {
   position: absolute;
-  left: -15%;
+  left: -30%;
   display: flex;
   width: max-content;
   align-items: center;
-  gap: 1rem;
-  padding-right: 1rem;
-  opacity: 0.86;
+    gap: 2rem;
+    padding-right: 2rem;
+  opacity: 0.78;
   will-change: transform;
 }
 
@@ -137,83 +137,73 @@ body {
 }
 
 .auth-wallpaper-track-two {
-  top: -5%;
+  top: -4%;
   animation: wallpaper-drift-right 82s linear infinite;
 }
 
 .auth-wallpaper-track-three {
-  top: 2%;
+  top: 4%;
   animation: wallpaper-drift-left 90s linear infinite;
 }
 
 .auth-wallpaper-track-four {
-  top: 9%;
+  top: 12%;
   animation: wallpaper-drift-right 76s linear infinite;
 }
 
 .auth-wallpaper-track-five {
-  top: 16%;
+  top: 20%;
   animation: wallpaper-drift-left 98s linear infinite;
 }
 
 .auth-wallpaper-track-six {
-  top: 23%;
+  top: 28%;
   animation: wallpaper-drift-right 72s linear infinite;
 }
 
 .auth-wallpaper-track-seven {
-  top: 30%;
+  top: 36%;
   animation: wallpaper-drift-left 88s linear infinite;
 }
 
 .auth-wallpaper-track-eight {
-  top: 37%;
+  top: 44%;
   animation: wallpaper-drift-right 78s linear infinite;
 }
 
 .auth-wallpaper-track-nine {
-  top: 44%;
+  top: 52%;
   animation: wallpaper-drift-left 94s linear infinite;
 }
 
 .auth-wallpaper-track-ten {
-  top: 51%;
+  top: 60%;
   animation: wallpaper-drift-right 84s linear infinite;
 }
 
 .auth-wallpaper-track-eleven {
-  top: 58%;
+  top: 68%;
   animation: wallpaper-drift-left 74s linear infinite;
 }
 
 .auth-wallpaper-track-twelve {
-  top: 65%;
+  top: 76%;
   animation: wallpaper-drift-right 90s linear infinite;
 }
 
 .auth-wallpaper-track-thirteen {
-  top: 72%;
+  top: 84%;
   animation: wallpaper-drift-left 80s linear infinite;
 }
 
 .auth-wallpaper-track-fourteen {
-  top: 79%;
+  top: 92%;
   animation: wallpaper-drift-right 86s linear infinite;
 }
 
 .auth-wallpaper-track-fifteen {
-  top: 86%;
-  animation: wallpaper-drift-left 78s linear infinite;
-}
-
-.auth-wallpaper-track-sixteen {
-  top: 93%;
-  animation: wallpaper-drift-right 92s linear infinite;
-}
-
-.auth-wallpaper-track-seventeen {
   top: 100%;
-  animation: wallpaper-drift-left 84s linear infinite;
+  animation: wallpaper-drift-left 78s linear infinite;
 }
 
 .startup-intro {
@@ -230,6 +220,7 @@ body {
   visibility: visible;
   pointer-events: none;
   animation: intro-fade-out 560ms ease 1150ms both;
+  visibility: hidden;
 }
 
 .startup-intro-content {
@@ -308,6 +299,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .startup-intro {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+
   .startup-intro-content,
   .startup-intro-mark,
   .startup-intro-loader span {
@@ -321,7 +317,7 @@ body {
   .auth-wallpaper-track-two { top: 13%; }
   .auth-wallpaper-track-three { top: 38%; }
   .auth-wallpaper-track-four { top: 63%; }
-  .auth-wallpaper-track-five { top: 88%; }
+  .auth-wallpaper-track-five,
   .auth-wallpaper-track-six,
   .auth-wallpaper-track-seven,
   .auth-wallpaper-track-eight,
@@ -331,31 +327,7 @@ body {
   .auth-wallpaper-track-twelve,
   .auth-wallpaper-track-thirteen,
   .auth-wallpaper-track-fourteen,
-  .auth-wallpaper-track-fifteen,
-  .auth-wallpaper-track-sixteen,
-  .auth-wallpaper-track-seventeen {
-    display: none;
-  }
-}
-
-@media (min-width: 1024px) and (max-height: 720px) {
-  .auth-wallpaper-track-one { top: -12%; }
-  .auth-wallpaper-track-two { top: -3%; }
-  .auth-wallpaper-track-three { top: 6%; }
-  .auth-wallpaper-track-four { top: 15%; }
-  .auth-wallpaper-track-five { top: 24%; }
-  .auth-wallpaper-track-six { top: 33%; }
-  .auth-wallpaper-track-seven { top: 42%; }
-  .auth-wallpaper-track-eight { top: 51%; }
-  .auth-wallpaper-track-nine { top: 60%; }
-  .auth-wallpaper-track-ten { top: 69%; }
-  .auth-wallpaper-track-eleven { top: 78%; }
-  .auth-wallpaper-track-twelve { top: 87%; }
-  .auth-wallpaper-track-thirteen { top: 96%; }
-  .auth-wallpaper-track-fourteen,
-  .auth-wallpaper-track-fifteen,
-  .auth-wallpaper-track-sixteen,
-  .auth-wallpaper-track-seventeen {
+  .auth-wallpaper-track-fifteen {
     display: none;
   }
 }
@@ -380,9 +352,7 @@ body {
   .auth-wallpaper-track-twelve,
   .auth-wallpaper-track-thirteen,
   .auth-wallpaper-track-fourteen,
-  .auth-wallpaper-track-fifteen,
-  .auth-wallpaper-track-sixteen,
-  .auth-wallpaper-track-seventeen {
+  .auth-wallpaper-track-fifteen {
     animation: none;
   }
 }

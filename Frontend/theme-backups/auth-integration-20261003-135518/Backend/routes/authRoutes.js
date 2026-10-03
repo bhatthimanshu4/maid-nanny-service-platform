@@ -6,18 +6,6 @@ const Helper = require("../models/Helper");
 
 const router = express.Router();
 
-function createAuthToken(user) {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is missing from the backend environment");
-  }
-
-  return jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-}
-
 // register user
 router.post("/signup", async (req, res) => {
   try {
@@ -30,10 +18,8 @@ router.post("/signup", async (req, res) => {
       city
     } = req.body;
 
-    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-
     // Check required fields
-    if (!name?.trim?.() || !normalizedEmail || !password || !phone?.trim?.()) {
+    if (!name || !email || !password || !phone) {
       return res.status(400).json({
         success: false,
         message: "Name, email, password and phone are required"
@@ -41,7 +27,7 @@ router.post("/signup", async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
@@ -55,15 +41,13 @@ router.post("/signup", async (req, res) => {
 
     // Create user
     const user = new User({
-      name: name.trim(),
-      email: normalizedEmail,
+      name,
+      email,
       password: hashedPassword,
-      phone: phone.trim(),
+      phone,
       address,
       city
     });
-
-    const token = createAuthToken(user);
 
     // Save user to MongoDB
     await user.save();
@@ -71,7 +55,6 @@ router.post("/signup", async (req, res) => {
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token,
       data: {
         id: user._id,
         name: user.name,
@@ -94,10 +77,9 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     // Check required fields
-    if (!normalizedEmail || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required"
@@ -105,7 +87,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Find user by email
-    const user = await User.findOne({ email: normalizedEmail });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
@@ -127,7 +109,17 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const token = createAuthToken(user);
+    // Generate JWT token
+    const token = jwt.sign( 
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d"
+      }
+    );
 
     res.status(200).json({
       success: true,
@@ -164,22 +156,14 @@ router.post("/helper-register", async (req, res) => {
       bio
     } = req.body;
 
-    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-
-    if (
-      !name?.trim?.() ||
-      !normalizedEmail ||
-      !password ||
-      !phone?.trim?.() ||
-      !["maid", "nanny"].includes(helperType)
-    ) {
+    if (!name || !email || !password || !phone || !helperType) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, password, phone, and a valid helper type are required"
+        message: "Name, email, password, phone and helper type are required"
       });
     }
 
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
@@ -191,14 +175,16 @@ router.post("/helper-register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
-      name: name.trim(),
-      email: normalizedEmail,
+      name,
+      email,
       password: hashedPassword,
-      phone: phone.trim(),
+      phone,
       address,
       city,
       role: "helper"
     });
+
+    await user.save();
 
     const helper = new Helper({
       user: user._id,
@@ -208,17 +194,12 @@ router.post("/helper-register", async (req, res) => {
       bio
     });
 
-    const token = createAuthToken(user);
-
-    await user.save();
     await helper.save();
 
     res.status(201).json({
       success: true,
       message: "Helper registered successfully",
-      token,
       data: {
-        id: user._id,
         userId: user._id,
         helperId: helper._id,
         name: user.name,
