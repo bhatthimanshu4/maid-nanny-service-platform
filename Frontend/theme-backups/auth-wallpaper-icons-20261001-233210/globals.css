@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff8f3;
+  --foreground: #292524;
+  --primary: #e8b89c;
+  --primary-dark: #d89b78;
+  --surface: #ffffff;
+  --border: #e7d5ca;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes smile-soft {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+@keyframes warm-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes helping-path {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes sparkle-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes wallpaper-drift-left {
+  from {
+    transform: rotate(-12deg) translate3d(0, 0, 0);
+  }
+  to {
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes wallpaper-drift-right {
+  from {
+    transform: rotate(-12deg) translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: rotate(-12deg) translate3d(0, 0, 0);
+  }
+}
+
+.animate-smile-soft {
+  animation: smile-soft 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.animate-warm-pulse {
+  animation: warm-pulse 8s ease-in-out infinite;
+}
+
+.animate-helping-path {
+  animation: helping-path 7s linear infinite;
+}
+
+.animate-sparkle-soft {
+  animation: sparkle-soft 3s ease-in-out infinite;
+}
+
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+
+.auth-wallpaper-track {
+  position: absolute;
+  left: -30%;
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  opacity: 0.78;
+  will-change: transform;
+}
+
+.auth-wallpaper-panel {
+  background:
+    radial-gradient(ellipse at 15% 20%, rgb(216 155 120 / 42%), transparent 42%),
+    radial-gradient(ellipse at 85% 75%, rgb(232 184 156 / 34%), transparent 44%),
+    linear-gradient(135deg, #292524, #6f4d3d 52%, #292524);
+}
+
+.auth-wallpaper-track svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 2.2;
+}
+
+.auth-wallpaper-track-one {
+  top: -3%;
+  animation: wallpaper-drift-left 68s linear infinite;
+}
+
+.auth-wallpaper-track-two {
+  top: 7%;
+  animation: wallpaper-drift-right 82s linear infinite;
+}
+
+.auth-wallpaper-track-three {
+  top: 17%;
+  animation: wallpaper-drift-left 90s linear infinite;
+}
+
+.auth-wallpaper-track-four {
+  top: 27%;
+  animation: wallpaper-drift-right 76s linear infinite;
+}
+
+.auth-wallpaper-track-five {
+  top: 37%;
+  animation: wallpaper-drift-left 98s linear infinite;
+}
+
+.auth-wallpaper-track-six {
+  top: 47%;
+  animation: wallpaper-drift-right 72s linear infinite;
+}
+
+.auth-wallpaper-track-seven {
+  top: 57%;
+  animation: wallpaper-drift-left 88s linear infinite;
+}
+
+.auth-wallpaper-track-eight {
+  top: 67%;
+  animation: wallpaper-drift-right 78s linear infinite;
+}
+
+.auth-wallpaper-track-nine {
+  top: 77%;
+  animation: wallpaper-drift-left 94s linear infinite;
+}
+
+.auth-wallpaper-track-ten {
+  top: 87%;
+  animation: wallpaper-drift-right 84s linear infinite;
+}
+
+.auth-wallpaper-track-eleven {
+  top: 97%;
+  animation: wallpaper-drift-left 74s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-smile-soft,
+  .animate-warm-pulse,
+  .animate-helping-path,
+  .animate-sparkle-soft,
+  .auth-wallpaper-track,
+  .auth-wallpaper-track-one,
+  .auth-wallpaper-track-two,
+  .auth-wallpaper-track-three,
+  .auth-wallpaper-track-four,
+  .auth-wallpaper-track-five,
+  .auth-wallpaper-track-six,
+  .auth-wallpaper-track-seven,
+  .auth-wallpaper-track-eight,
+  .auth-wallpaper-track-nine,
+  .auth-wallpaper-track-ten,
+  .auth-wallpaper-track-eleven {
+    animation: none;
+  }
+}
