@@ -2,12 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signUp, type AccountRole } from "@/lib/auth";
 import AuthWallpaper from "@/components/AuthWallpaper";
 
-export default function SignupPage() {
+export default function SignupPage({ initialRole = "household" }: { initialRole?: AccountRole }) {
   const router = useRouter();
-  const [role, setRole] = useState<AccountRole>("household");
+  const [role, setRole] = useState<AccountRole>(initialRole);
   const [helperType, setHelperType] = useState<"maid" | "nanny">("maid");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +28,7 @@ export default function SignupPage() {
         role,
         ...(role === "helper" ? { helperType } : {}),
       });
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "We couldn't create your account.");
@@ -192,9 +193,9 @@ export default function SignupPage() {
           </p>
 
           <div className="mt-4 text-center">
-            <a href="/" className="text-sm text-foreground/70 hover:text-foreground">
+            <Link href="/" className="text-sm text-foreground/70 hover:text-foreground">
               ← Back to home
-            </a>
+            </Link>
           </div>
         </div>
       </section>

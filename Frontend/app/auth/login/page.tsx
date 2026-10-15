@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AuthWallpaper from "@/components/AuthWallpaper";
 import { signIn } from "@/lib/auth";
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
         String(formData.get("email") ?? "").trim(),
         String(formData.get("password") ?? ""),
       );
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "We couldn't log you in.");
@@ -92,9 +93,9 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-4 text-center">
-            <a href="/" className="text-sm text-foreground/70 hover:text-foreground">
+            <Link href="/" className="text-sm text-foreground/70 hover:text-foreground">
               ← Back to home
-            </a>
+            </Link>
           </div>
         </div>
       </section>

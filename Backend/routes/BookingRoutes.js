@@ -9,6 +9,10 @@ const router = express.Router();
 // Create booking
 router.post("/", authMiddleware, async (req, res) => {
   try {
+    if (req.user.role !== "household") {
+      return res.status(403).json({ success: false, message: "Only household accounts can create booking requests" });
+    }
+
     const {
       helperId,
       servicePlanId,
@@ -23,12 +27,21 @@ router.post("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const helper = await Helper.findById(helperId);
+    const date = new Date(bookingDate);
+    if (Number.isNaN(date.getTime()) || date <= new Date()) {
+      return res.status(400).json({ success: false, message: "Booking date must be a valid future date and time" });
+    }
+
+    const helper = await Helper.findOne({
+      _id: helperId,
+      availability: "available",
+      verificationStatus: "accepted"
+    });
 
     if (!helper) {
       return res.status(404).json({
         success: false,
-        message: "Helper not found"
+        message: "This helper is unavailable or has not been verified"
       });
     }
 
@@ -49,8 +62,8 @@ router.post("/", authMiddleware, async (req, res) => {
       household: req.user.id,
       helper: helperId,
       servicePlan: servicePlanId,
-      bookingDate,
-      notes
+      bookingDate: date,
+      notes: typeof notes === "string" ? notes.slice(0, 1000) : ""
     });
 
     await booking.save();
@@ -181,7 +194,11 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
     const bookings = await Booking.find({
       household: req.user.id
     })
-      .populate("helper")
+      .populate({
+        path: "helper",
+        select: "helperType experience availability verificationStatus user",
+        populate: { path: "user", select: "name email phone" }
+      })
       .populate("servicePlan");
 
     res.status(200).json({
@@ -197,6 +214,29 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
   }
 });
 
+// Household booking history
+router.get("/history", authMiddleware, async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      household: req.user.id,
+      status: { $in: ["completed", "rejected", "cancelled"] }
+    })
+      .populate({
+        path: "helper",
+        select: "helperType experience availability verificationStatus user",
+        populate: { path: "user", select: "name email phone city" }
+      })
+      .populate("servicePlan");
+
+    res.status(200).json({
+      success: true,
+      message: "Household booking history fetched successfully",
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 // Accept or reject booking
 router.put("/:id/status", authMiddleware, async (req, res) => {
   try {

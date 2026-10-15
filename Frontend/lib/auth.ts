@@ -5,6 +5,8 @@ export type AuthUser = {
   name: string;
   email: string;
   phone: string;
+  address?: string;
+  city?: string;
   role: AccountRole | "admin";
 };
 
@@ -37,6 +39,8 @@ export function normalizeAuthUser(value: unknown): AuthUser | null {
     name: candidate.name,
     email: candidate.email,
     phone: typeof candidate.phone === "string" ? candidate.phone : "",
+    ...(typeof candidate.address === "string" ? { address: candidate.address } : {}),
+    ...(typeof candidate.city === "string" ? { city: candidate.city } : {}),
     role: candidate.role as AuthUser["role"],
   };
 }
@@ -57,6 +61,7 @@ export function getStoredAuthUser() {
 export function storeAuthSession(token: string, user: AuthUser) {
   window.localStorage.setItem(TOKEN_KEY, token);
   window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  window.dispatchEvent(new CustomEvent("helper4u:auth-updated", { detail: user }));
 }
 
 export function clearAuthSession() {
