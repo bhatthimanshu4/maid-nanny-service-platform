@@ -6,34 +6,76 @@ const upload = require("../middleware/uploadmiddleware");
 
 const router = express.Router();
 
-// Public helper directory. Return only profile details intended for discovery.
-router.get("/browse", async (_req, res) => {
+// Browse, search and filter verified helpers
+router.get("/browse", async (req, res) => {
   try {
-    const helpers = await Helper.find({ availability: "available", verificationStatus: "accepted" })
-      .select("helperType experience skills availability verificationStatus bio user")
-      .populate("user", "name city")
+    const { search, helperType, city } = req.query;
+
+    const filter = {
+      verificationStatus: "verified",
+      availability: "available"
+    };
+
+    if (helperType) {
+      filter.helperType = helperType;
+    }
+
+    let helpers = await Helper.find(filter)
+      .populate("user", "name email phone address city")
+      .select("-verificationDocuments")
       .lean();
+
+    if (search) {
+      helpers = helpers.filter((helper) =>
+        (helper.user?.name || "")
+          .toLowerCase()
+          .includes(String(search).toLowerCase())
+      );
+    }
+
+    if (city) {
+      helpers = helpers.filter((helper) =>
+        (helper.user?.city || "")
+          .toLowerCase()
+          .includes(String(city).toLowerCase())
+      );
+    }
+
     const plans = await ServicePlan.find({
       helper: { $in: helpers.map((helper) => helper._id) },
       isActive: true
-    }).select("helper planType price description").lean();
+    })
+      .select("helper planType price description")
+      .lean();
+
     const plansByHelper = new Map();
+
     for (const plan of plans) {
       const key = plan.helper.toString();
-      plansByHelper.set(key, [...(plansByHelper.get(key) || []), plan]);
+      plansByHelper.set(key, [
+        ...(plansByHelper.get(key) || []),
+        plan
+      ]);
     }
-    const visibleHelpers = helpers.map((helper) => ({
-      ...helper,
-      plans: plansByHelper.get(helper._id.toString()) || []
-    }));
+
+    const visibleHelpers = helpers
+      .map((helper) => ({
+        ...helper,
+        skills: helper.skills || [],
+        plans: plansByHelper.get(helper._id.toString()) || []
+      }))
+      .filter((helper) => helper.plans.length > 0);
 
     res.status(200).json({
       success: true,
-      message: "Available helpers fetched successfully",
-      data: visibleHelpers.filter((helper) => helper.plans.length > 0)
+      message: "Helpers fetched successfully",
+      data: visibleHelpers
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 });
 

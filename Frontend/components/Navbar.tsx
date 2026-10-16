@@ -1,52 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-<<<<<<< HEAD
-import {
-  clearAuthSession,
-  getAuthToken,
-  getStoredAuthUser,
-=======
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   clearAuthSession,
   getAuthToken,
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
+  getStoredAuthUser,
   normalizeAuthUser,
   storeAuthSession,
   type AuthUser,
 } from "@/lib/auth";
 
 export default function Navbar() {
-<<<<<<< HEAD
-=======
   const router = useRouter();
   const pathname = usePathname();
   const isUserDashboard = pathname === "/dashboard";
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     let isActive = true;
-<<<<<<< HEAD
-    const token = getAuthToken();
-    const cachedUser = getStoredAuthUser();
-
-    if (cachedUser) setUser(cachedUser);
-    if (!token) return () => { isActive = false; };
-=======
     const handleAuthUpdated = (event: Event) => {
       const updatedUser = (event as CustomEvent<AuthUser>).detail;
       if (updatedUser) setUser(updatedUser);
     };
     window.addEventListener("helper4u:auth-updated", handleAuthUpdated);
+
     const token = getAuthToken();
+    const cachedUser = getStoredAuthUser();
+
+    if (cachedUser) setUser(cachedUser);
     if (!token) return () => {
       isActive = false;
       window.removeEventListener("helper4u:auth-updated", handleAuthUpdated);
     };
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
 
     fetch("/api/backend/users/profile", {
       headers: { Authorization: `Bearer ${token}` },
@@ -71,40 +58,20 @@ export default function Navbar() {
         // Keep the cached name visible if the backend is temporarily offline.
       });
 
-<<<<<<< HEAD
-    return () => { isActive = false; };
-=======
     return () => {
       isActive = false;
       window.removeEventListener("helper4u:auth-updated", handleAuthUpdated);
     };
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
   }, []);
 
   function handleSignOut() {
     clearAuthSession();
     setUser(null);
-<<<<<<< HEAD
-=======
     router.replace("/");
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
   }
 
   return (
     <nav className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-surface px-6 py-5 sm:px-8">
-<<<<<<< HEAD
-      <a href="/" className="text-xl font-bold text-foreground">
-        Helper<span className="text-primary-dark">4U</span>
-      </a>
-
-      <div className="flex flex-wrap items-center justify-end gap-4 text-sm text-foreground sm:gap-8">
-        <a href="/household" className="hover:text-primary-dark">Find a Helper</a>
-        <a href="#how-it-works" className="hover:text-primary-dark">How It Works</a>
-        <a href="/auth/signup" className="hover:text-primary-dark">For Helpers</a>
-
-        {user ? (
-          <>
-=======
       <Link href="/" className="text-xl font-bold text-foreground">
         Helper<span className="text-primary-dark">4U</span>
       </Link>
@@ -120,37 +87,23 @@ export default function Navbar() {
 
         {user ? (
           <>
-
             <Link href="/dashboard" className="font-semibold text-primary-dark hover:underline">My dashboard</Link>
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
             <span className="font-medium" aria-live="polite">Hi, {user.name}</span>
             <button type="button" onClick={handleSignOut} className="hover:text-primary-dark">
               Log out
             </button>
           </>
         ) : (
-<<<<<<< HEAD
-          <a href="/auth/login" className="hover:text-primary-dark">Login</a>
-        )}
-
-        {!user && (
-          <a
-=======
           <Link href="/auth/login" className="hover:text-primary-dark">Login</Link>
         )}
 
         {!user && (
           <Link
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
             href="/auth/signup"
             className="rounded-lg bg-primary px-5 py-2.5 font-medium text-foreground hover:bg-primary-dark"
           >
             Get Started
-<<<<<<< HEAD
-          </a>
-=======
           </Link>
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
         )}
       </div>
     </nav>

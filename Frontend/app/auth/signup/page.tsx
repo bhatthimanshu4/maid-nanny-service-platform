@@ -2,22 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import { signUp, type AccountRole } from "@/lib/auth";
 import AuthWallpaper from "@/components/AuthWallpaper";
+import Link from "next/link";
 
 export default function SignupPage() {
   const router = useRouter();
   const [role, setRole] = useState<AccountRole>("household");
-=======
-import Link from "next/link";
-import { signUp, type AccountRole } from "@/lib/auth";
-import AuthWallpaper from "@/components/AuthWallpaper";
-
-export default function SignupPage({ initialRole = "household" }: { initialRole?: AccountRole }) {
-  const router = useRouter();
-  const [role, setRole] = useState<AccountRole>(initialRole);
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
   const [helperType, setHelperType] = useState<"maid" | "nanny">("maid");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,11 +28,7 @@ export default function SignupPage({ initialRole = "household" }: { initialRole?
         role,
         ...(role === "helper" ? { helperType } : {}),
       });
-<<<<<<< HEAD
       router.replace("/");
-=======
-      router.replace("/dashboard");
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "We couldn't create your account.");
@@ -206,15 +193,10 @@ export default function SignupPage({ initialRole = "household" }: { initialRole?
           </p>
 
           <div className="mt-4 text-center">
-<<<<<<< HEAD
-            <a href="/" className="text-sm text-foreground/70 hover:text-foreground">
-              ← Back to home
-            </a>
-=======
+
             <Link href="/" className="text-sm text-foreground/70 hover:text-foreground">
               ← Back to home
             </Link>
->>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
           </div>
         </div>
       </section>
