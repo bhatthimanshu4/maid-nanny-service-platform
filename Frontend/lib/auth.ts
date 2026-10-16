@@ -5,6 +5,11 @@ export type AuthUser = {
   name: string;
   email: string;
   phone: string;
+<<<<<<< HEAD
+=======
+  address?: string;
+  city?: string;
+>>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
   role: AccountRole | "admin";
 };
 
@@ -37,6 +42,11 @@ export function normalizeAuthUser(value: unknown): AuthUser | null {
     name: candidate.name,
     email: candidate.email,
     phone: typeof candidate.phone === "string" ? candidate.phone : "",
+<<<<<<< HEAD
+=======
+    ...(typeof candidate.address === "string" ? { address: candidate.address } : {}),
+    ...(typeof candidate.city === "string" ? { city: candidate.city } : {}),
+>>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
     role: candidate.role as AuthUser["role"],
   };
 }
@@ -57,6 +67,10 @@ export function getStoredAuthUser() {
 export function storeAuthSession(token: string, user: AuthUser) {
   window.localStorage.setItem(TOKEN_KEY, token);
   window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+<<<<<<< HEAD
+=======
+  window.dispatchEvent(new CustomEvent("helper4u:auth-updated", { detail: user }));
+>>>>>>> a48ac3b5384830f4ef6fa69a24ae62d6ed0838c3
 }
 
 export function clearAuthSession() {

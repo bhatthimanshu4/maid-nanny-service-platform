@@ -4,6 +4,7 @@ const Helper = require("../models/Helper");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 const ServiceCategory = require("../models/ServiceCategory");
+const Complaint = require("../models/Complaint");
 
 
 const router = express.Router();
@@ -261,8 +262,132 @@ router.post("/categories", authMiddleware, async (req, res) => {
   }
 });
 
-// get all details of categories
+// Get all complaints (Admin only)
+router.get("/complaints", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only"
+      });
+    }
 
+    const { status } = req.query;
+    const filter = {};
+
+    if (status) {
+      const allowedStatuses = [
+        "pending",
+        "in-progress",
+        "resolved",
+        "rejected"
+      ];
+
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid complaint status"
+        });
+      }
+
+      filter.status = status;
+    }
+
+    const complaints = await Complaint.find(filter)
+      .populate("raisedBy", "name email phone role")
+      .populate("booking")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Complaints fetched successfully",
+      count: complaints.length,
+      data: complaints
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+
+// Update complaint status and admin response
+router.put("/complaints/:id/status", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only"
+      });
+    }
+
+    const { status, adminResponse } = req.body;
+
+    const allowedStatuses = [
+      "pending",
+      "in-progress",
+      "resolved",
+      "rejected"
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid complaint status"
+      });
+    }
+
+    if (
+      adminResponse !== undefined &&
+      typeof adminResponse !== "string"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin response must be a string"
+      });
+    }
+
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    complaint.status = status;
+
+    if (adminResponse !== undefined) {
+      complaint.adminResponse = adminResponse.trim();
+    }
+
+    await complaint.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Complaint updated successfully",
+      data: complaint
+    });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid complaint ID"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+
+// get all details of categories
 router.get("/categories", authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== "admin") {
@@ -290,7 +415,6 @@ router.get("/categories", authMiddleware, async (req, res) => {
 });
 
 //update the categroies
-
 router.put("/categories/:id", authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== "admin") {
@@ -370,7 +494,6 @@ router.put("/categories/:id", authMiddleware, async (req, res) => {
 });
 
 // status chnage active dactive 
-
 router.put("/categories/:id/status", authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== "admin") {
@@ -422,6 +545,9 @@ router.put("/categories/:id/status", authMiddleware, async (req, res) => {
     });
   }
 });
+
+
+
 
 
 // // Get all bookings
@@ -607,7 +733,5 @@ router.put("/helpers/:helperId/verification",authMiddleware,async (req, res) => 
     }
   }
 );
-
-
 
 module.exports = router;

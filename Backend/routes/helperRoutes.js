@@ -1,9 +1,41 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Helper = require("../models/Helper");
+const ServicePlan = require("../models/ServicePlan");
 const upload = require("../middleware/uploadmiddleware");
 
 const router = express.Router();
+
+// Public helper directory. Return only profile details intended for discovery.
+router.get("/browse", async (_req, res) => {
+  try {
+    const helpers = await Helper.find({ availability: "available", verificationStatus: "accepted" })
+      .select("helperType experience skills availability verificationStatus bio user")
+      .populate("user", "name city")
+      .lean();
+    const plans = await ServicePlan.find({
+      helper: { $in: helpers.map((helper) => helper._id) },
+      isActive: true
+    }).select("helper planType price description").lean();
+    const plansByHelper = new Map();
+    for (const plan of plans) {
+      const key = plan.helper.toString();
+      plansByHelper.set(key, [...(plansByHelper.get(key) || []), plan]);
+    }
+    const visibleHelpers = helpers.map((helper) => ({
+      ...helper,
+      plans: plansByHelper.get(helper._id.toString()) || []
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Available helpers fetched successfully",
+      data: visibleHelpers.filter((helper) => helper.plans.length > 0)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // Get logged-in helper profile
 router.get("/profile", authMiddleware, async (req, res) => {
@@ -170,68 +202,18 @@ router.post("/verification-documents",authMiddleware,upload.single("document"),a
   }
 );
 
-// Browse, search and filter verified helpers
-router.get("/browse", async (req, res) => {
-  try {
-    const { search, helperType, city } = req.query;
-
-    const filter = {
-      verificationStatus: "verified",
-      availability: "available"
-    };
-
-    if (helperType) {
-      filter.helperType = helperType;
-    }
-
-    const helpers = await Helper.find(filter)
-      .populate("user", "name email phone address city")
-      .select("-verificationDocuments");
-
-    let filteredHelpers = helpers;
-
-    if (search) {
-      filteredHelpers = filteredHelpers.filter((helper) =>
-        helper.user.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (city) {
-      filteredHelpers = filteredHelpers.filter(
-        (helper) =>
-          helper.user.city &&
-          helper.user.city.toLowerCase() === city.toLowerCase()
-      );
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Helpers fetched successfully",
-      data: filteredHelpers
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// View helper profile
+// View an accepted helper profile
 router.get("/:id", async (req, res) => {
   try {
     const helper = await Helper.findOne({
       _id: req.params.id,
-      verificationStatus: "verified"
+      verificationStatus: "accepted"
     })
       .populate("user", "name email phone address city")
       .select("-verificationDocuments");
 
     if (!helper) {
-      return res.status(404).json({
-        success: false,
-        message: "Helper not found"
-      });
+      return res.status(404).json({ success: false, message: "Helper not found" });
     }
 
     res.status(200).json({
@@ -240,13 +222,7 @@ router.get("/:id", async (req, res) => {
       data: helper
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
-
-
-
 module.exports = router;

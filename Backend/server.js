@@ -33,6 +33,9 @@ app.use("/api/bookings", bookingRoutes);
 const reviewRoutes = require("./routes/reviewRoutes");
 app.use("/api/reviews", reviewRoutes);
 
+const complaintRoutes = require("./routes/complaintRoutes");
+app.use("/api/complaints", complaintRoutes);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected successfully'))
