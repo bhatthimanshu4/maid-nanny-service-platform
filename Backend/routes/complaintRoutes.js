@@ -80,7 +80,26 @@ router.get("/my-complaints", authMiddleware, async (req, res) => {
     const complaints = await Complaint.find({
       raisedBy: req.user.id
     })
-      .populate("booking")
+      .populate({
+  path: "raisedBy",
+  select: "name email role"
+})
+.populate({
+  path: "booking",
+  populate: [
+    {
+      path: "household",
+      select: "name email"
+    },
+    {
+      path: "helper",
+      populate: {
+        path: "user",
+        select: "name email"
+      }
+    }
+  ]
+})
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

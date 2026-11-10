@@ -5,6 +5,7 @@ const User = require("../models/User");
 const Booking = require("../models/Booking");
 const ServiceCategory = require("../models/ServiceCategory");
 const Complaint = require("../models/Complaint");
+const Notification = require("../models/Notification");
 
 
 const router = express.Router();
@@ -684,54 +685,99 @@ router.get("/bookings", authMiddleware, async (req, res) => {
   }
 });
 
+
 // Update helper verification status
-router.put("/helpers/:helperId/verification",authMiddleware,async (req, res) => {
-    try {
-      const { verificationStatus } = req.body;
+router.put("/helpers/:helperId/verification", authMiddleware, async (req, res) => {
+  try {
+    const { verificationStatus } = req.body;
 
-      if (!["verified", "rejected", "pending"].includes(verificationStatus)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid verification status"
-        });
-      }
-
-      if (req.user.role !== "admin") {
-        return res.status(403).json({
-          success: false,
-          message: "Only admin can update verification status"
-        });
-      }
-
-      const helper = await Helper.findById(req.params.helperId);
-
-      if (!helper) {
-        return res.status(404).json({
-          success: false,
-          message: "Helper not found"
-        });
-      }
-
-      helper.verificationStatus = verificationStatus;
-
-      await helper.save();
-
-      res.status(200).json({
-        success: true,
-        message: "Helper verification status updated successfully",
-        data: {
-          helperId: helper._id,
-          verificationStatus: helper.verificationStatus
-        }
-      });
-
-    } catch (error) {
-      res.status(500).json({
+    if (!["verified", "rejected", "pending"].includes(verificationStatus)) {
+      return res.status(400).json({
         success: false,
-        message: error.message
+        message: "Invalid verification status"
       });
     }
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only admin can update verification status"
+      });
+    }
+
+    const helper = await Helper.findById(req.params.helperId);
+
+    if (!helper) {
+      return res.status(404).json({
+        success: false,
+        message: "Helper not found"
+      });
+    }
+
+    helper.verificationStatus = verificationStatus;
+
+    await helper.save();
+
+    // Find helper's user account
+    const helperUserId = helper.user;
+
+    if (verificationStatus === "rejected") {
+      // Check existing unresolved verification notification
+      const existingNotification = await Notification.findOne({
+        user: helperUserId,
+        actionType: "verify_now",
+        isResolved: false
+      });
+
+      // Create notification only if no unresolved one exists
+      if (!existingNotification) {
+        await Notification.create({
+          user: helperUserId,
+          type: "verification_pending",
+          message: "Your verification is still pending. Please upload your documents again.",
+          actionType: "verify_now"
+        });
+      }
+    }
+
+    if (verificationStatus === "verified") {
+      // Resolve old Verify Now notifications
+      await Notification.updateMany(
+        {
+          user: helperUserId,
+          actionType: "verify_now",
+          isResolved: false
+        },
+        {
+          $set: { isResolved: true }
+        }
+      );
+
+      // Create approval notification
+      await Notification.create({
+        user: helperUserId,
+        type: "verification_approved",
+        message: "Your verification is complete. You can now set your availability and create service plans.",
+        actionType: "set_availability"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Helper verification status updated successfully",
+      data: {
+        helperId: helper._id,
+        verificationStatus: helper.verificationStatus
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
-);
+});
+
 
 module.exports = router;

@@ -3,7 +3,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const Helper = require("../models/Helper");
 const ServicePlan = require("../models/ServicePlan");
 const upload = require("../middleware/uploadmiddleware");
-
+const Notification = require("../models/Notification");
 const router = express.Router();
 
 // Browse, search and filter verified helpers
@@ -201,8 +201,9 @@ router.put("/availability", authMiddleware, async (req, res) => {
   }
 });
 
-// Upload helper verification document
-router.post("/verification-documents",authMiddleware,upload.single("document"),async (req, res) => {
+ // Upload helper verification document
+router.post("/verification-documents",authMiddleware,
+  async (req, res, next) => {
     try {
       const helper = await Helper.findOne({
         user: req.user.id
@@ -215,6 +216,37 @@ router.post("/verification-documents",authMiddleware,upload.single("document"),a
         });
       }
 
+      // Verified helper cannot upload documents again
+      if (helper.verificationStatus === "verified") {
+        return res.status(403).json({
+          success: false,
+          message: "Your verification is already complete"
+        });
+      }
+
+      // Only pending or rejected helpers can upload
+      if (!["pending", "rejected"].includes(helper.verificationStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: "Document upload is not allowed"
+        });
+      }
+
+      req.helper = helper;
+      next();
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  },
+  upload.single("document"),
+  async (req, res) => {
+    try {
+      const helper = req.helper;
+
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -224,13 +256,30 @@ router.post("/verification-documents",authMiddleware,upload.single("document"),a
 
       helper.verificationDocuments.push(req.file.path);
 
+      // After re-upload, status becomes pending
+      helper.verificationStatus = "pending";
+
       await helper.save();
+
+      // Resolve all unresolved notifications of this helper
+      await Notification.updateMany(
+        {
+          user: req.user.id,
+          isResolved: false
+        },
+        {
+          $set: {
+            isResolved: true
+          }
+        }
+      );
 
       res.status(200).json({
         success: true,
-        message: "Verification document uploaded successfully",
+        message: "Verification document uploaded successfully. Your verification is pending.",
         data: {
           file: req.file.path,
+          verificationStatus: helper.verificationStatus,
           verificationDocuments: helper.verificationDocuments
         }
       });
@@ -241,8 +290,7 @@ router.post("/verification-documents",authMiddleware,upload.single("document"),a
         message: error.message
       });
     }
-  }
-);
+  });
 
 // View an accepted helper profile
 router.get("/:id", async (req, res) => {
