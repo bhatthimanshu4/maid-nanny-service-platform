@@ -685,7 +685,6 @@ router.get("/bookings", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Update helper verification status
 router.put("/helpers/:helperId/verification", authMiddleware, async (req, res) => {
   try {

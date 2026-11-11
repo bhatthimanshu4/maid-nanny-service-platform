@@ -4,6 +4,7 @@ const Helper = require("../models/Helper");
 const ServicePlan = require("../models/ServicePlan");
 const upload = require("../middleware/uploadmiddleware");
 const Notification = require("../models/Notification");
+const mapHelperVerificationStatus = require("../utils/helperStatus");
 const router = express.Router();
 
 // Browse, search and filter verified helpers
@@ -96,7 +97,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Helper profile fetched successfully",
-      data: helper
+      data: mapHelperVerificationStatus(helper)
     });
 
   } catch (error) {
@@ -140,7 +141,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Helper profile updated successfully",
-      data: helper
+      data: mapHelperVerificationStatus(helper)
     });
 
   } catch (error) {
