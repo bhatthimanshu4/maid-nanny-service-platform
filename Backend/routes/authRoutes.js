@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Helper = require("../models/Helper");
+const mapHelperVerificationStatus = require("../utils/helperStatus");
 
 const router = express.Router();
 
@@ -91,12 +92,15 @@ router.post("/signup", async (req, res) => {
 });
 
 // Login User
+
+// Login User
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    // Check required fields
+    const normalizedEmail =
+      typeof email === "string" ? email.trim().toLowerCase() : "";
+
     if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
@@ -114,7 +118,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Compare entered password with hashed password
+    // Compare password
     const isPasswordMatch = await bcrypt.compare(
       password,
       user.password
@@ -126,27 +130,46 @@ router.post("/login", async (req, res) => {
         message: "Invalid email or password"
       });
     }
-        if (!user.isActive) {
-  return res.status(403).json({
-    success: false,
-    message: "Your account is inactive. Please contact admin."
-  });
-}
+
+    // Check active account
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is inactive. Please contact admin."
+      });
+    }
 
     const token = createAuthToken(user);
+
+    // Common login response data
+    const responseData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role
+    };
+
+    // Add helper details only for helper users
+    if (user.role === "helper") {
+      const helper = await Helper.findOne({ user: user._id });
+
+      if (helper) {
+        const helperData = mapHelperVerificationStatus(helper);
+
+        responseData.helperId = helper._id;
+        responseData.helperType = helper.helperType;
+        responseData.verificationStatus = helperData.verificationStatus;
+      }
+    }
 
     res.status(200).json({
       success: true,
       message: "Login successful",
-      token: token,
-      data: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role
-      }
+      token,
+      data: responseData
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -154,6 +177,7 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
 // Helper
 router.post("/helper-register", async (req, res) => {
   try {

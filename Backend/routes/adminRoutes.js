@@ -690,7 +690,7 @@ router.put("/helpers/:helperId/verification", authMiddleware, async (req, res) =
   try {
     const { verificationStatus } = req.body;
 
-    if (!["verified", "rejected", "pending"].includes(verificationStatus)) {
+if (!["accepted", "rejected", "pending"].includes(verificationStatus)) {
       return res.status(400).json({
         success: false,
         message: "Invalid verification status"
@@ -739,27 +739,37 @@ router.put("/helpers/:helperId/verification", authMiddleware, async (req, res) =
       }
     }
 
-    if (verificationStatus === "verified") {
-      // Resolve old Verify Now notifications
-      await Notification.updateMany(
-        {
-          user: helperUserId,
-          actionType: "verify_now",
-          isResolved: false
-        },
-        {
-          $set: { isResolved: true }
-        }
-      );
 
-      // Create approval notification
-      await Notification.create({
-        user: helperUserId,
-        type: "verification_approved",
-        message: "Your verification is complete. You can now set your availability and create service plans.",
-        actionType: "set_availability"
-      });
+if (verificationStatus === "accepted") {
+  await Notification.updateMany(
+    {
+      user: helperUserId,
+      actionType: "verify_now",
+      isResolved: false
+    },
+    {
+      $set: { isResolved: true }
     }
+  );
+
+  // Check existing unresolved approval notification
+  const existingApproval = await Notification.findOne({
+    user: helperUserId,
+    type: "verification_approved",
+    isResolved: false
+  });
+
+  // Create only if no unresolved approval exists
+  if (!existingApproval) {
+    await Notification.create({
+      user: helperUserId,
+      type: "verification_approved",
+      message: "Your verification is complete. You can now set your availability and create service plans.",
+      actionType: "set_availability"
+    });
+  }
+}
+
 
     res.status(200).json({
       success: true,
