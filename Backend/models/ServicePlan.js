@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const servicePlanSchema = new mongoose.Schema(
@@ -5,6 +6,13 @@ const servicePlanSchema = new mongoose.Schema(
     helper: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Helper",
+      required: true
+    },
+
+    // Link service plan with service category
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ServiceCategory",
       required: true
     },
 

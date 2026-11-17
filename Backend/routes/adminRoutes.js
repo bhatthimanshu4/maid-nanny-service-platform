@@ -33,7 +33,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     });
 
     const verifiedHelpers = await Helper.countDocuments({
-      verificationStatus: "verified"
+      verificationStatus: "accepted"
     });
 
     const pendingHelpers = await Helper.countDocuments({

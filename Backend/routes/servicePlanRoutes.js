@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Helper = require("../models/Helper");
 const ServicePlan = require("../models/ServicePlan");
+const ServiceCategory = require("../models/ServiceCategory");
 
 const router = express.Router();
 
@@ -9,15 +10,16 @@ const router = express.Router();
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const {
+      category,
       planType,
       price,
       description
     } = req.body;
 
-    if (!planType || price === undefined) {
+    if (!category || !planType || price === undefined) {
       return res.status(400).json({
         success: false,
-        message: "Plan type and price are required"
+        message: "Category, plan type and price are required"
       });
     }
 
@@ -25,6 +27,19 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid plan type"
+      });
+    }
+
+    // Step 4: Validate service category
+    const serviceCategory = await ServiceCategory.findOne({
+      _id: category,
+      isActive: true
+    });
+
+    if (!serviceCategory) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or inactive service category"
       });
     }
 
@@ -39,12 +54,13 @@ router.post("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const plan = new ServicePlan({
-      helper: helper._id,
-      planType,
-      price,
-      description
-    });
+   const plan = new ServicePlan({
+  helper: helper._id,
+  category: serviceCategory._id,
+  planType,
+  price,
+  description
+});
 
     await plan.save();
 
@@ -76,9 +92,9 @@ router.get("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const plans = await ServicePlan.find({
-      helper: helper._id
-    });
+const plans = await ServicePlan.find({
+  helper: helper._id
+}).populate("category", "name description");
 
     res.status(200).json({
       success: true,
@@ -94,10 +110,12 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+
 // Update service plan
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const {
+      category,
       planType,
       price,
       description,
@@ -135,6 +153,23 @@ router.put("/:id", authMiddleware, async (req, res) => {
         success: false,
         message: "Invalid plan type"
       });
+    }
+
+    // Validate and update service category
+    if (category !== undefined) {
+      const serviceCategory = await ServiceCategory.findOne({
+        _id: category,
+        isActive: true
+      });
+
+      if (!serviceCategory) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid or inactive service category"
+        });
+      }
+
+      plan.category = serviceCategory._id;
     }
 
     plan.planType = planType ?? plan.planType;
@@ -202,16 +237,39 @@ router.delete("/:id", authMiddleware, async (req, res) => {
 // View active service plans of a helper
 router.get("/helper/:helperId", async (req, res) => {
   try {
-    const plans = await ServicePlan.find({
-      helper: req.params.helperId,
-      isActive: true
-    }).populate("helper");
+const plans = await ServicePlan.find({
+  helper: req.params.helperId,
+  isActive: true
+})
+.populate("helper")
+.populate("category", "name description");
 
     res.status(200).json({
       success: true,
       message: "Helper service plans fetched successfully",
       data: plans
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Get active service categories
+router.get("/categories", authMiddleware, async (req, res) => {
+  try {
+    const categories = await ServiceCategory.find({
+      isActive: true
+    }).select("name description");
+
+    res.status(200).json({
+      success: true,
+      message: "Service categories fetched successfully",
+      data: categories
+    });
+
   } catch (error) {
     res.status(500).json({
       success: false,
