@@ -22,6 +22,22 @@ router.post("/", authMiddleware, async (req, res) => {
         message: "Category, plan type and price are required"
       });
     }
+    if (
+  typeof price !== "number" ||
+  !Number.isFinite(price) ||
+  price <= 0
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Price must be a number greater than 0"
+  });
+}
+if (!require("mongoose").Types.ObjectId.isValid(category)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid service category ID"
+  });
+}
 
     if (!["hourly", "monthly", "yearly"].includes(planType)) {
       return res.status(400).json({
@@ -43,6 +59,8 @@ router.post("/", authMiddleware, async (req, res) => {
       });
     }
 
+    
+
     const helper = await Helper.findOne({
       user: req.user.id
     });
@@ -53,6 +71,13 @@ router.post("/", authMiddleware, async (req, res) => {
         message: "Helper profile not found"
       });
     }
+    // Check helper verification status
+if (helper.verificationStatus !== "accepted") {
+  return res.status(403).json({
+    success: false,
+    message: "Only verified helpers can create service plans"
+  });
+}
 
    const plan = new ServicePlan({
   helper: helper._id,
@@ -110,7 +135,6 @@ const plans = await ServicePlan.find({
   }
 });
 
-
 // Update service plan
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
@@ -144,9 +168,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
         message: "Service plan not found"
       });
     }
+    if (category !== undefined &&
+  !require("mongoose").Types.ObjectId.isValid(category)
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid service category ID"
+  });
+}
 
-    if (
-      planType !== undefined &&
+    if (planType !== undefined &&
       !["hourly", "monthly", "yearly"].includes(planType)
     ) {
       return res.status(400).json({
@@ -154,6 +185,19 @@ router.put("/:id", authMiddleware, async (req, res) => {
         message: "Invalid plan type"
       });
     }
+    if (
+  price !== undefined &&
+  (
+    typeof price !== "number" ||
+    !Number.isFinite(price) ||
+    price <= 0
+  )
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Price must be a number greater than 0"
+  });
+}
 
     // Validate and update service category
     if (category !== undefined) {
@@ -207,6 +251,14 @@ router.delete("/:id", authMiddleware, async (req, res) => {
       });
     }
 
+            if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid service plan ID"
+  });
+}
+
+
     const plan = await ServicePlan.findOne({
       _id: req.params.id,
       helper: helper._id
@@ -218,7 +270,6 @@ router.delete("/:id", authMiddleware, async (req, res) => {
         message: "Service plan not found"
       });
     }
-
     await ServicePlan.findByIdAndDelete(plan._id);
 
     res.status(200).json({
